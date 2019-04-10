@@ -76,7 +76,8 @@ In addition, it also returns the results from the random forests classification 
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
 ```{r}
 imp65=best.prev$`Importance`$`Prevalence 65`
-knitr::kable(imp65, format="markdown") %>% kableExtra::kable_styling(full_width = F)
+head(knitr::kable(imp65, format="markdown"))
+
 #To get the table with OOB error results.
 #best.prev$`OOB error`
 ```

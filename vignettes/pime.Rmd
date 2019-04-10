@@ -1,48 +1,64 @@
 ---
-title: "PIME"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{pime}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: github_document
+
 ---
-## How to install PIME package
 
-To install PIME Package first install the devtools package, install.packages("devtools"). Then run
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "doc/"
+)
+```
+
+# PIME: Prevalence Interval for Microbiome Evaluation
+PIME removes the within group variation found in metataxonomic surveys (16S rRNA datasets) by capturing only biological differences at high samples prevalence levels.
+
+# How to install PIME package
+
+To install PIME first install the devtools package. 
+Then load the library(devtools) and run install_github using the following commands.
+```{r, eval = FALSE}
+#install.packages("devtools")
+library(devtools)
 install_github("microEcology/pime")
-pime uses a Phyloseq object as input. A description of the phyloseq object and a tutorial on how to create this file in R using OTU tables in many different formats is detailed into the Phyloseq website https://joey711.github.io/phyloseq/ 
+```
+PIME uses a Phyloseq object as input. A description of the phyloseq object and a tutorial on how to create this file in R using OTU tables in many different formats is detailed into the Phyloseq website https://joey711.github.io/phyloseq/ 
 
-##Step-by-step example.
+# Step-by-step example
 
-The first step in PIME is to define whether the microbial community presents a high relative abundance of taxa with low prevalence, which is defined as noise in PIME analysis. This is defined by Random Forests analysis. In this example we run PIME using the restroom dataset (https://doi.org/10.1007%2Fs10482-017-0976-6) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom). 
+```{r, echo=FALSE, out.height='500px'}
+knitr::include_graphics("doc/Figure1.png", dpi = NULL)
+```
 
-The prediction using random forests trees on full dataset. Results in Out of Bag error rate
+The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (https://doi.org/10.1007%2Fs10482-017-0976-6) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom). 
+
+Prediction using random forests on full dataset. Results in Out of Bag error rate. The input file was rarefied at 500 sequences for the purpose of this example (speed up the analysis). Using a rarefied dataset is recommended at this step.
 ```{r}
 library(pime)
 data("restroom")
 pime.oob.error(restroom, "Environment")
 ```
-If the OOB error rate <=0.1, the dataset present large differences already, and pime might not be necessary. 
-If the OOB error rate is greater, next functions will find the best prevalence interval for the dataset.
+
+The OOB error rate <=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. 
+Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.
+
 This function takes two parameters: The phyloseq object (restroom) and the predictor variable (Environment).
 
 ## Split the dataset by predictor variable
-
 Two parameters are required to run this function: The phyloseq object (restroom) and the predictor variable (Environment).
-
 ```{r}
-per_variable_obj <- pime.split.by.variable(restroom, "Environment")
+per_variable_obj= pime.split.by.variable(restroom, "Environment")
 per_variable_obj
 ```
 
+
 ## Calculate the highest possible prevalence intervals
-
 This function calculates prevalence for different intervals by increments of 5. 
-The input file is the output from the pime.split.by.variable (per_variable_obj)
-
+The input file is the output from the pime.split.by.variable(per_variable_obj)
 ```{r}
-prevalences <- pime.prevalence(per_variable_obj)
-prevalences
+prevalences=pime.prevalence(per_variable_obj)
+head(prevalences)
 ```
 
 ## Calculate the best prevalence interval for the dataset 
@@ -59,22 +75,52 @@ In addition, it also returns the results from the random forests classification 
 
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
 ```{r}
-imp50=best.prev$`Importance`$`Prevalence 50`
-knitr::kable(imp50) %>% kableExtra::kable_styling(full_width = F)
+imp65=best.prev$`Importance`$`Prevalence 65`
+head(knitr::kable(imp65, format="markdown"))
+
 #To get the table with OOB error results.
 #best.prev$`OOB error`
 ```
 
-## Estimating prediction error
-To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns in a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.
+## Within this dataset the best prevalence interval was 65%
+
+To obtain the phyloseq object at this cutoff use the following command.
 
 ```{r}
-#randomized=pime.error.prediction(restroom, "Environment", bootstrap = 10, parallel = TRUE, max.prev = 95)
-#randomized$Plot
-#randomized$`Table results'
+prevalence.65 = prevalences$`65`
+prevalence.65
+```
+## Estimating prediction error
+To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.
+```{r, eval=FALSE}
+randomized=pime.error.prediction(restroom, "Environment", bootstrap = 10, parallel = TRUE, max.prev = 95)
+randomized$Plot
+randomized$'Table results'
+```
+It is also possible to estimate the variation of OOB error with each prevalence interval filtering. This is done by running the random forests classification for n times, determined by the user. This function will return a boxplot figure and a table for each classification error.
+```{r, eval=FALSE}
+replicated.oob.error= pime.oob.replicate(prevalences, "Environment", bootstrap = 10, parallel = TRUE)
 ```
 
-It is also possible to estimate the variation of Out of Bag error with each prevalence interval filtering. This is done by running the random forests classification for n times, determined by the user. This function will return a boxplot figure and a table for each classificaiton error.
+# Getting Help
 
-```{r}
-#replicated.oob.error= pime.oob.replicate(prevalences, "Environment", bootstrap = 10, parallel = TRUE)
+Please contact us if you need any help: *contact@brmicrobiome.org*
+
+
+# PIME Team
+
+Luiz F. W. Roesch (Universidade Federal do Pampa - Brazil)
+
+Priscila T. Dobbler (Universidade Federal do Pampa - Brazil)
+
+Victor S. Pylro (Universidade Federal de Lavras - Brazil)
+
+Bryan Kolaczkowski (University of Florida - United States of America)
+
+Jennifer C. Drew (University of Florida - United States of America)
+
+Eric W. Triplett (University of Florida - United States of America)
+
+# Citation
+
+Roesch et al. (2018), PIME: including the concept of prevalence for uncovering differences in microbiome noised data. Frontiers, submitted.

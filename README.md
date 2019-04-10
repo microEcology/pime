@@ -601,6 +601,34 @@ knitr::kable(imp65, format="markdown") %>% kableExtra::kable_styling(full_width 
 </table>
 
 ``` r
+<<<<<<< HEAD
+=======
+imp50=best.prev$`Importance`$`Prevalence 50`
+
+knitr::kable(imp50, format = 'markdown')
+#>    SequenceID Restroom_F Restroom_M MeanDecreaseAccuracy MeanDecreaseGini
+#> 1 denovo87919 0.07763333 0.07651905           0.07043333        1.2137966
+#> 2 denovo22521 0.02973333 0.02083333           0.02368175        0.4528930
+#> 3 denovo33035 0.02583333 0.01526667           0.01836587        0.4317984
+#> 4  denovo6450 0.02536667 0.01143333           0.01563095        0.4134463
+#> 5 denovo10912 0.01236667 0.01700000           0.01281190        0.2605335
+#> 6 denovo29652 0.01713333 0.00730000           0.01125794        0.2908274
+#>         Rank1             Rank2                  Rank3
+#> 1 k__Bacteria p__Actinobacteria      c__Actinobacteria
+#> 2  Unassigned              <NA>                   <NA>
+#> 3 k__Bacteria p__Proteobacteria c__Gammaproteobacteria
+#> 4  Unassigned              <NA>                   <NA>
+#> 5  Unassigned              <NA>                   <NA>
+#> 6 k__Bacteria p__Proteobacteria c__Alphaproteobacteria
+#>                  Rank4                 Rank5            Rank6 Rank7
+#> 1 o__Bifidobacteriales f__Bifidobacteriaceae             <NA>  <NA>
+#> 2                 <NA>                  <NA>             <NA>  <NA>
+#> 3   o__Pseudomonadales      f__Moraxellaceae g__Enhydrobacter   s__
+#> 4                 <NA>                  <NA>             <NA>  <NA>
+#> 5                 <NA>                  <NA>             <NA>  <NA>
+#> 6   o__Caulobacterales   f__Caulobacteraceae              g__   s__
+
+>>>>>>> 7c7bd12739f26458767724f4517a572fdb6fd765
 #To get the table with OOB error results.
 #best.prev$`OOB error`
 ```
