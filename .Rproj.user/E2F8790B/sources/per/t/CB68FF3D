@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1554133284560.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4177671902",
+    "id" : "CB68FF3D",
+    "lastKnownWriteTime" : 1541092130,
+    "last_content_update" : 1541092130,
+    "path" : "C:/Users/prisc/Desktop/pime/R/pime-package.r",
+    "project_path" : "R/pime-package.r",
+    "properties" : {
+        "cursorPosition" : "15,2",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1554133396987.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2235170478",
+    "id" : "DB7B774E",
+    "lastKnownWriteTime" : 1541093172,
+    "last_content_update" : 1541093172,
+    "path" : "C:/Users/prisc/Desktop/pime/R/pime.prevalence.R",
+    "project_path" : "R/pime.prevalence.R",
+    "properties" : {
+        "cursorPosition" : "22,27",
+        "scrollLine" : "7"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

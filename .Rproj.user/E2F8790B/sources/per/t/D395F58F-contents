@@ -1,0 +1,68 @@
+#'Best Prevalence
+#'
+#'This function is the core of PIME. It uses ranger::ranger() to build random forests trees for sample classification
+#'with each prevalence interval returned by pime.prevalence(). Model uses
+#'
+#'The output is a table with OOB error rate,
+#'the number of remaining OTUs and sequences after prevalence filtering.
+#'
+#'
+#'@param prev.list List phyloseq objects with the calculated prevalences for each interval. The output of
+#'pime.prevalence()
+#'@param variable Any variable in the metadata to be analyzed
+#'@keywords prevalence OOB classification
+#'@examples
+#' #Spliting data by "Environment"
+#' phylist=pime.split.by.variable(restroom, "Environment")
+#'
+#' #Computes prevalences for each treatment "Environment" separately
+#' prev=pime.prevalence(phylist)
+#'
+#' #Finds best prevalence interval
+#' set.seed(2124)
+#' pime.best.prevalence(prev, "Environment")
+#'
+#'@return OOB error
+#'
+#'@importFrom phyloseq "otu_table"
+#'@importFrom phyloseq "sample_data"
+#'@importFrom phyloseq "tax_table"
+#'@export
+pime.best.prevalence<-function (prev.list, variable) {
+  randon<-list()
+  imp<-list()
+  gs <- as(object = sample_data(prev.list[[1]]), Class = "data.frame")
+  Variable <- as.factor(gs[, variable])
+  pb <- progress::progress_bar$new(total = length(prev.list), clear=F)
+  pb$tick(0)
+  for (i in prev.list){
+    if ((phyloseq::taxa_are_rows(i)==TRUE)==TRUE){
+      train<-t(otu_table(i))
+    } else {
+      train<-otu_table(i)}
+    pb$tick()
+    Sys.sleep(1 / 100)
+    response <- Variable
+    training.set <- data.frame(response, train)# Combine them into 1 data frame
+    train.model <- ranger::ranger(response ~ ., data = training.set, importance = "permutation")
+    randon[[length(randon)+1]]<-train.model$prediction.error
+    Importance<-train.model$variable.importance %>% sort(decreasing = T)
+    imp.otu<-data.frame(names(Importance), Importance) %>% dplyr::filter(Importance > mean(Importance))
+    k=data.frame(rownames(tax_table(i)),tax_table(i)) %>% dplyr::filter(.[,1]%in%imp.otu[,1])
+    names(k)[1]<-c("SequenceID")
+    imp[[length(imp)+1]]=k
+  }
+  #names tables from Lista as the names of the tables inside list.core
+  names(randon) <- paste("Prevalence", names(prev.list))
+  names(imp) <- paste("Prevalence", names(prev.list))
+  #gets only the first line, all columns of every table inside perm
+  #results1 <- do.call(rbind, lapply(perm,`[`,1,))
+  Interval= paste(as.numeric(names(prev.list)), "%", sep = "")
+  OOB <- sapply(randon, cbind)
+  colnames(imp)
+  Nseqs=sapply(prev.list, function(z) sum(phyloseq::sample_sums(z)))
+  OTUs=sapply(prev.list, phyloseq::ntaxa)
+  OOB.err=as.data.frame(cbind(OOB,Interval,OTUs,Nseqs))
+  print(OOB.err)
+  return(list("OOB error"=OOB.err, "Importance"=imp))
+}
