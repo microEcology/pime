@@ -20,7 +20,7 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 Step-by-step example
 ====================
 
-<img src="doc/Figure1.tif" height="500px" />
+<img src="doc/Figure1.png" height="600px" />
 
 The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (<https://doi.org/10.1007%2Fs10482-017-0976-6>) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom).
 
@@ -30,7 +30,7 @@ Prediction using random forests on full dataset. Results in Out of Bag error rat
 library(pime)
 data("restroom")
 pime.oob.error(restroom, "Environment")
-#> [1] 0.4444444
+#> [1] 0.5555556
 ```
 
 The OOB error rate &lt;=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.

@@ -28,7 +28,7 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 # Step-by-step example
 
 ```{r, echo=FALSE, out.height='500px'}
-knitr::include_graphics("doc/Figure1.tif", dpi = NULL)
+knitr::include_graphics("doc/Figure1.png", dpi = NULL)
 ```
 
 The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (https://doi.org/10.1007%2Fs10482-017-0976-6) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom). 
