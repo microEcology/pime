@@ -136,7 +136,8 @@ best.prev=pime.best.prevalence(prevalences, "Environment")
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only those OTUs/ASVs with importance higher than overal mean.
 
 ``` r
-head(best.prev$`Importance`$`Prevalence 50`)
+imp50=best.prev$`Importance`$`Prevalence 50`
+knitr::kable(imp50) %>% kableExtra::kable_styling(full_width = F)
 #>    SequenceID Restroom_F Restroom_M MeanDecreaseAccuracy MeanDecreaseGini
 #> 1 denovo87919 0.07763333 0.07651905           0.07043333        1.2137966
 #> 2 denovo22521 0.02973333 0.02083333           0.02368175        0.4528930
