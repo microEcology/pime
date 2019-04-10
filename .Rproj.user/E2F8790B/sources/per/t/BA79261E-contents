@@ -27,9 +27,8 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 
 # Step-by-step example
 
-```{r, echo=FALSE, out.height='600px'}
+```{r, echo=FALSE, out.height='500px'}
 knitr::include_graphics("doc/Figure1.tif", dpi = NULL)
-#![prevalences](https://github.com/microEcology/pime/doc) | width=50} 
 ```
 
 The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (https://doi.org/10.1007%2Fs10482-017-0976-6) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom). 
@@ -76,19 +75,19 @@ In addition, it also returns the results from the random forests classification 
 
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
 ```{r}
-imp50=best.prev$`Importance`$`Prevalence 50`
-knitr::kable(imp50) %>% kableExtra::kable_styling(full_width = F)
+imp65=best.prev$`Importance`$`Prevalence 65`
+knitr::kable(imp65, format="markdown") %>% kableExtra::kable_styling(full_width = F)
 #To get the table with OOB error results.
 #best.prev$`OOB error`
 ```
 
-## Within this dataset the best prevalence interval was 50%
+## Within this dataset the best prevalence interval was 65%
 
 To obtain the phyloseq object at this cutoff use the following command.
 
 ```{r}
-prevalence.50 = prevalences$`50`
-prevalence.50
+prevalence.65 = prevalences$`65`
+prevalence.65
 ```
 ## Estimating prediction error
 To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.
