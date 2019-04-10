@@ -8,13 +8,16 @@ pime.prevalence(phylist)
 }
 \arguments{
 \item{phylist}{Input, takes a list of phyloseq objects (one for each variable),
-output from pime.split.by.variable()}
+output from \code{\link{pime.split.by.variable}}}
+}
+\value{
+A list with a phyloseq object (OTU/ASV and metadata table) per prevalence interval.
 }
 \description{
-This function takes the output of pime.split.by.variable(). It estimates the highest prevalence
-possible (no empty OTU table), calculates prevalence for taxa at 5% interval by increments of 5, until
-maximum prevalence possible (no empty OTU table or droping samples).
-After prevalence calculation, merges phyloseq objects for each interval and variable.
+This function takes the output of  \code{\link{pime.split.by.variable}}. It estimates the highest prevalence
+possible (no empty OTU/ASV table), calculates prevalence for taxa, starting at 5% interval by increments of 5, until
+maximum prevalence possible (no empty OTU table or dropping samples).
+After prevalence calculation, each prevalence interval are merged.
 }
 \examples{
 phylist=pime.split.by.variable(restroom, "Environment")

@@ -13,19 +13,20 @@ Depends:
     R (>= 3.4)
 biocViews:
 Imports:
-    plyr (>= 1.8.4),
-    microbiome,
-    phyloseq,
-    foreach,
-    ggplot2,
-    magrittr,
-    parallel,
-    doParallel,
-    forcats,
-    dplyr,
-    tidyr,
-    ranger,
-    progress,
+    plyr (>= 1.8),
+    microbiome (>= 1.4),
+    phyloseq (>= 1.26),
+    foreach (>= 1.4),
+    ggplot2 (>= 3.1),
+    magrittr (>= 1.5),
+    parallel (>= 3.5.3),
+    doParallel (>= 1.0.14),
+    forcats (>= 0.4),
+    dplyr (>= 0.8),
+    tidyr (>= 0.8),
+    randomForest (>= 4.6),
+    ranger (>= 0.11.2),
+    progress (>= 1.2),
     vegan (>= 2.5.2)
 RoxygenNote: 6.1.1
 Suggests: knitr,

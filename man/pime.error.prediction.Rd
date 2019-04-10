@@ -5,10 +5,10 @@
 \title{Error prediction}
 \usage{
 pime.error.prediction(physeq, variable, bootstrap, max.prev,
-  parallel = TRUE, ...)
+  parallel = TRUE)
 }
 \arguments{
-\item{physeq}{Input in phyloseq format, original data, pime.prevalence() unfiltered}
+\item{physeq}{Input in phyloseq format, original data, \code{\link{pime.prevalence}} unfiltered}
 
 \item{variable}{Variable to run the model, to be randomized}
 
@@ -17,20 +17,18 @@ pime.error.prediction(physeq, variable, bootstrap, max.prev,
 \item{max.prev}{Max prevalence reached with pime.prevalence()}
 
 \item{parallel}{Whether or not to run in parallel. Default is TRUE}
-
-\item{...}{Aditional parameters passed to ranger::ranger() on random forest classification.}
 }
 \description{
 For each prevalence interval it randomizes the samples labels into arbitrary groupings using n random
-permutations (user defined). For each randomized, prevalence filtered dataset, the OOB error rate is
+permutations (user defined). For each, randomized and prevalence filtered, dataset the OOB error rate is
 calculated to estimate whether the original differences in groups of samples occur by chance.
 Results are in a list containing a table and a boxplot summarizing the results.
 }
 \examples{
 phylist=pime.split.by.variable(restroom, "Environment")
 prev=pime.prevalence(phylist)
-pime.best.prevalence(prev, "Environment", method.dist="bray")
-set.seed(123)
+pime.best.prevalence(prev, "Environment")
+set.seed(42)
 result=pime.error.prediction(restroom, "Environment", bootstrap=10, max.prev=90, parallel=TRUE)
 result$Plot
 result$'Results table'

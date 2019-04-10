@@ -5,16 +5,18 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3972836417",
+    "hash" : "1938023488",
     "id" : "BA79261E",
-    "lastKnownWriteTime" : 1541096978,
-    "last_content_update" : 1541096978,
-    "path" : "C:/Users/prisc/Desktop/pime/README.md",
-    "project_path" : "README.md",
+    "lastKnownWriteTime" : 1554897047,
+    "last_content_update" : 1554897047226,
+    "path" : "C:/Users/prisc/Desktop/pime/README.Rmd",
+    "project_path" : "README.Rmd",
     "properties" : {
+        "cursorPosition" : "29,38",
+        "scrollLine" : "15"
     },
     "relative_order" : 11,
     "source_on_save" : false,
     "source_window" : "",
-    "type" : "markdown"
+    "type" : "r_markdown"
 }

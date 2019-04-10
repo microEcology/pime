@@ -4,25 +4,26 @@
 \alias{pime.oob.error}
 \title{Baseline noise detection}
 \usage{
-pime.oob.error(physeq, variable, ...)
+pime.oob.error(physeq, variable)
 }
 \arguments{
 \item{physeq}{The input file in phyloseq object format}
 
 \item{variable}{Any variable present in the metadata to be analyzed. "variable to run the classification"}
-
-\item{...}{Aditional parameters passed to ranger::ranger() on random forest classification.}
 }
 \description{
-This function predicts the likelihood of detecting any factor as source of sample variation.
-It runs random forests on prevalence unfiltered dataset (the original dataset). The model
+This function builds random forests for sample classification measuring the prediction error of random forests.
+It wraps on \code{\link{ranger}}, taking as input a prevalence unfiltered dataset (the original dataset). The model
 performance is indicated by the out-of-bag (OOB) error rate. Higher OOB error
 indicates the dataset has a high relative abundance of taxa with low prevalence, which is defined as
-noise in PIME analysis. There is no formal criteria for definition of low or high OOB error but empirical
+noise in PIME analysis. There is no formal criteria for definition of low or high OOB error, but empirical
 tests showed that PIME can improve microbiome differences when OOB error >= 0.01.
 }
 \examples{
 pime.oob.error(restroom, "Environment")
+}
+\seealso{
+\code{\link{ranger}}
 }
 \keyword{Classification}
 \keyword{OOBerror}

@@ -2,8 +2,9 @@
 #'
 #'      This function is the core of PIME. It uses \code{\link{randomForest}} to build random forests trees for samples
 #'classification and variable importance computation. It performs classifications for each prevalence interval
-#'returned by \code{\link{pime.prevalence}}. Variable importance is calculated, returning the Mean Decrease Accuracy (MDA) for each feature/OTU/ASV. PIME filters out those features with
-#'importance below the overall mean, for each prevalence level.
+#'returned by \code{\link{pime.prevalence}}. Variable importance is calculated, returning the Mean Decrease Accuracy (MDA),
+#'Mean Decrease Impurity (MDI), overall and by sample group, and taxonomy for each feature/OTU/ASV. 
+#'PIME keeps the top 30 variables with highest MDA each prevalence level.
 #'
 #'@param prev.list List phyloseq objects with the calculated prevalences for each interval. The output of
 #' \code{\link{pime.prevalence}}
@@ -55,6 +56,7 @@ pime.best.prevalence<-function (prev.list, variable) {
       dplyr::top_n(30, MeanDecreaseAccuracy)
     k=as.data.frame(tax_table(i)) %>% .[rownames(.)%in%imp.otu[,1],] %>% data.frame(imp.otu,.)
     names(k)[1]<-c("SequenceID")
+    rownames(k)<-NULL
     imp[[length(imp)+1]]=k
    }
   #names tables from Lista as the names of the tables inside list.core

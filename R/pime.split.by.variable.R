@@ -5,7 +5,7 @@
 #'
 #'@param physeq The input file in phyloseq object format
 #'@param variable Any variable present in the metadata to be analyzed "variable to split"
-#'@param drop_zeroes Remove OTUs with zeros, default is TRUE. If FALSE, OTUs with zero counts will be kept.
+#'@param drop_zeroes Remove OTUs/ASVs with zeros, default is TRUE. If FALSE, OTUs with zero counts will be kept.
 #' Further analysis based on dissimilarity measurements (Bray-Curtis) might produce empty files.
 #'@examples phylist=pime.split.by.variable(restroom, "Environment")
 #'@importFrom phyloseq "otu_table"

@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3371529595",
+    "hash" : "3191272693",
     "id" : "D395F58F",
-    "lastKnownWriteTime" : 1554145376,
-    "last_content_update" : 1554145376285,
+    "lastKnownWriteTime" : 1554896841,
+    "last_content_update" : 1554896841800,
     "path" : "C:/Users/prisc/Desktop/pime/R/pime.best.prevalence.R",
     "project_path" : "R/pime.best.prevalence.R",
     "properties" : {
-        "cursorPosition" : "68,0",
-        "scrollLine" : "0"
+        "cursorPosition" : "24,47",
+        "scrollLine" : "26"
     },
     "relative_order" : 3,
     "source_on_save" : false,

@@ -4,28 +4,26 @@
 \alias{pime.oob.replicate}
 \title{Replicated random forests}
 \usage{
-pime.oob.replicate(prev.list, variable, bootstrap, parallel = TRUE, ...)
+pime.oob.replicate(prev.list, variable, bootstrap, parallel = TRUE)
 }
 \arguments{
-\item{prev.list}{List of phyloseq objects. After runing the DMPC.prevalence()}
+\item{prev.list}{List of phyloseq objects. Output of \code{\link{pime.prevalence}}}
 
 \item{variable}{Variable to run the model}
 
 \item{bootstrap}{Number to run repetitions}
 
 \item{parallel}{Whether to run parallel or not. Default TRUE}
-
-\item{...}{Aditional parameters passed to ranger::ranger() on random forest classification.}
 }
 \description{
-This function is part of the error detection step. It performs a Random Forest analyses and computes
-the OOB error for n replications in each prevalence
+This function is part of the error detection step. It performs a random forests classification, with
+\code{\link{ranger}}, and computes the OOB error for n replications in each prevalence
 interval without randomizing the sample labels. Returns a results table with prediction error and a boxplot.
 }
 \examples{
 phylist=pime.split.by.variable(restroom, "Environment")
 prevalences=pime.prevalence(phylist)
-set.seed(2125)
+set.seed(42)
 tab=pime.bootstraped.randonForest(prevalences, "Environment", bootstrap=10, parallel=TRUE)
 tab$Plot
 tab$'Results table'

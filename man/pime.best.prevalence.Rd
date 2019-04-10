@@ -8,20 +8,22 @@ pime.best.prevalence(prev.list, variable)
 }
 \arguments{
 \item{prev.list}{List phyloseq objects with the calculated prevalences for each interval. The output of
-pime.prevalence()}
+\code{\link{pime.prevalence}}}
 
 \item{variable}{Any variable in the metadata to be analyzed}
 }
 \value{
-OOB error
+The function returns a list with a 'OOB error' table with results from random forests classification, numbers of
+sequence and OTUs/ASVs for each prevalence level. It also returns a list 'Importance', with a table for each prevalence
+interval, containing the OTUs/ASVs with importance (MDA and MDI) above the overall mean, with individual importance values and the
+taxonomy classification.
 }
 \description{
-This function is the core of PIME. It uses ranger::ranger() to build random forests trees for sample classification
-with each prevalence interval returned by pime.prevalence(). Model uses
-}
-\details{
-The output is a table with OOB error rate,
-the number of remaining OTUs and sequences after prevalence filtering.
+This function is the core of PIME. It uses \code{\link{randomForest}} to build random forests trees for samples
+classification and variable importance computation. It performs classifications for each prevalence interval
+returned by \code{\link{pime.prevalence}}. Variable importance is calculated, returning the Mean Decrease Accuracy (MDA),
+Mean Decrease Impurity (MDI), overall and by sample group, and taxonomy for each feature/OTU/ASV. 
+PIME keeps the top 30 variables with highest MDA each prevalence level.
 }
 \examples{
 #Spliting data by "Environment"
@@ -31,9 +33,13 @@ phylist=pime.split.by.variable(restroom, "Environment")
 prev=pime.prevalence(phylist)
 
 #Finds best prevalence interval
-set.seed(2124)
+set.seed(42)
 pime.best.prevalence(prev, "Environment")
 
+}
+\seealso{
+\code{\link{pime.prevalence}}
+ \code{\link{randomForest}}
 }
 \keyword{OOB}
 \keyword{classification}

@@ -14,9 +14,7 @@ machine learning algorithm and combines them into a single model to predict the 
 any factor as source of sample variation. Higher OOB error indicates the dataset has a high relative
 abundance of taxa with low prevalence, which is defined as noise in PIME analysis.
     To remove the noise, PIME applies the following steps: i) per treatment slices of the full dataset are obtained and filtered
-using prevalence values for taxa at 5% intervals; ii) calculate Bray-Curtis (or other dissimilarity measures
-available in vegdist function) distance matrices for each prevalence interval and compute the variance
-partitioning using the permutational multivariate analysis of variance (PERMANOVA); iii) build decision trees
+using prevalence values for taxa at 5% intervals; ii) build decision trees
 and determine the decline in noise in each prevalence interval. The number of taxa and the number of remaining
 sequences for each prevalence interval are also computed.
 

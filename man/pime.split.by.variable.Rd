@@ -11,7 +11,7 @@ pime.split.by.variable(physeq, variable, drop_zeroes = T)
 
 \item{variable}{Any variable present in the metadata to be analyzed "variable to split"}
 
-\item{drop_zeroes}{Remove OTUs with zeros, default is TRUE. If FALSE, OTUs with zero counts will be kept.
+\item{drop_zeroes}{Remove OTUs/ASVs with zeros, default is TRUE. If FALSE, OTUs with zero counts will be kept.
 Further analysis based on dissimilarity measurements (Bray-Curtis) might produce empty files.}
 }
 \description{
