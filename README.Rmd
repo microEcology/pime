@@ -12,6 +12,12 @@ knitr::opts_chunk$set(
 ```
 
 # PIME: Prevalence Interval for Microbiome Evaluation
+
+
+```{r, echo=FALSE, out.height='600px'}
+knitr::include_graphics("doc/Figure1.png", dpi = NULL)
+```
+
 PIME removes the within group variation found in metataxonomic surveys (16S rRNA datasets) by capturing only biological differences at high samples prevalence levels.
 
 # How to install PIME package
@@ -27,9 +33,11 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 
 # Step-by-step example
 
-```{r, echo=FALSE, out.height='500px'}
-knitr::include_graphics("doc/Figure1.png", dpi = NULL)
+
+```{r, echo=FALSE, out.height='1000px'}
+knitr::include_graphics("doc/Figure2.png", dpi = NULL)
 ```
+
 
 The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (https://doi.org/10.1007%2Fs10482-017-0976-6) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom). 
 
@@ -71,7 +79,7 @@ set.seed(42)
 best.prev=pime.best.prevalence(prevalences, "Environment")
 ```
 
-In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Index) and taxonomy are also included.
+In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.
 
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
 ```{r}

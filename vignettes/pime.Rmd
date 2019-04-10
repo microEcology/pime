@@ -27,7 +27,7 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 
 # Step-by-step example
 
-```{r, echo=FALSE, out.height='500px'}
+```{r, echo=FALSE, out.height='600px'}
 knitr::include_graphics("doc/Figure1.png", dpi = NULL)
 ```
 
@@ -71,7 +71,7 @@ set.seed(42)
 best.prev=pime.best.prevalence(prevalences, "Environment")
 ```
 
-In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Index) and taxonomy are also included.
+In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Imortance) and taxonomy are also included.
 
 To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
 ```{r}
