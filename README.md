@@ -207,4 +207,4 @@ Eric W. Triplett (University of Florida - United States of America)
 Citation
 ========
 
-Roesch et al. (2018), PIME: including the concept of prevalence for uncovering differences in microbiome noised data. Frontiers, submitted.
+Roesch et al. (2018), PIME: including the concept of prevalence for uncovering differences in microbiome noised data.
