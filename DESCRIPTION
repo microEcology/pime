@@ -6,7 +6,7 @@ Author: Priscila Dobbler, Luiz Roesch
 Maintainer: Priscila Dobbler <prisciladobbler@gmail.com>
 Description: This package identifies the best interval for microbiome prevalence,based
       on Out of Bag error from random forests classification.
-License: AGPL-3
+License: mit
 Encoding: UTF-8
 LazyData: true
 Depends:
