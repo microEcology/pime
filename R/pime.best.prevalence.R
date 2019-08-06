@@ -52,9 +52,9 @@ pime.best.prevalence<-function (prev.list, variable) {
     train.model <- randomForest::randomForest(response~., data = training.set, importance=TRUE)
     randon[[length(randon)+1]] <-  round(train.model$err.rate[500,1], digits=4)*100
     Importance <- train.model$importance
-    imp.otu <- data.frame(rownames(Importance), Importance) %>% dplyr::arrange(., dplyr::desc(MeanDecreaseAccuracy)) %>%
+    imp.otu <- data.frame(rownames(Importance), Importance) 
+    k=as.data.frame(tax_table(i)) %>% .[rownames(.)%in%imp.otu[,1],] %>% data.frame(imp.otu,.) %>% dplyr::arrange(., dplyr::desc(MeanDecreaseAccuracy)) %>%
       dplyr::top_n(30, MeanDecreaseAccuracy)
-    k=as.data.frame(tax_table(i)) %>% .[rownames(.)%in%imp.otu[,1],] %>% data.frame(imp.otu,.)
     names(k)[1]<-c("SequenceID")
     rownames(k)<-NULL
     imp[[length(imp)+1]]=k
