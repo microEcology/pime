@@ -20,10 +20,48 @@ knitr::include_graphics("doc/Figure1.png", dpi = NULL)
 
 PIME removes the within group variation found in metataxonomic surveys (16S rRNA datasets) by capturing only biological differences at high samples prevalence levels.
 
+# First steps: installing 'phyloseq' and creating a 'phyloseq' object
+
+To install phyloseq start R and enter:
+
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("phyloseq")
+```
+
+Phyloseq aggregates, mainly, an otu_table (with OTUs abundances), tax_table (taxonomy), and a sample_data (sample information) objects. 
+
+Importing output from DADA2
+
+```{r, eval=FALSE}
+seqtab = readRDS("path_to_file/sequence_table_final.rds")
+tax= readRDS("path_to_file/tax_final.rds")
+map <- "path_to_file/sample_data.txt"
+ps <- phyloseq(otu_table(seqtab, taxa_are_rows=FALSE), 
+               tax_table(taxa))
+sample_metadata = import_qiime_sample_data(map)
+physeq =merge_phyloseq(ps, sample_metadata)
+```
+
+Importing otu_table as a biom file with taxonomy
+
+```{r, eval=FALSE}
+jsonbiomfile = "path_to_file/otu_table_fix.biom"
+mapfile = "path_to_file/v35_map_uniquebyPSN.txt"
+biom = import_biom(jsonbiomfile, mapfile, parseFunction=parse_taxonomy_greengenes)
+map = import_qiime_sample_data(mapfile)
+input = merge_phyloseq(biom,map)
+```
+
+For further data input methods and examples go to https://joey711.github.io/phyloseq/import-data.html
+
+
 # How to install PIME package
 
 To install PIME first install the devtools package. 
 Then load the library(devtools) and run install_github using the following commands.
+
 ```{r, eval = FALSE}
 #install.packages("devtools")
 library(devtools)
@@ -79,12 +117,13 @@ set.seed(42)
 best.prev=pime.best.prevalence(prevalences, "Environment")
 ```
 
-In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.
+In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accuracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.
 
-To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
+To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, with highest MDA.
+
 ```{r}
 imp65=best.prev$`Importance`$`Prevalence 65`
-head(knitr::kable(imp65, format="markdown"))
+knitr::kable(head(imp65), format="markdown")
 
 #To get the table with OOB error results.
 #best.prev$`OOB error`

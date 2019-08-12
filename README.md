@@ -6,6 +6,43 @@ PIME: Prevalence Interval for Microbiome Evaluation
 
 PIME removes the within group variation found in metataxonomic surveys (16S rRNA datasets) by capturing only biological differences at high samples prevalence levels.
 
+First steps: installing 'phyloseq' and creating a 'phyloseq' object
+===================================================================
+
+To install phyloseq start R and enter:
+
+``` r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("phyloseq")
+```
+
+Phyloseq aggregates, mainly, an otu\_table (with OTUs abundances), tax\_table (taxonomy), and a sample\_data (sample information) objects.
+
+Importing output from DADA2
+
+``` r
+seqtab = readRDS("path_to_file/sequence_table_final.rds")
+tax= readRDS("path_to_file/tax_final.rds")
+map <- "path_to_file/sample_data.txt"
+ps <- phyloseq(otu_table(seqtab, taxa_are_rows=FALSE), 
+               tax_table(taxa))
+sample_metadata = import_qiime_sample_data(map)
+physeq =merge_phyloseq(ps, sample_metadata)
+```
+
+Importing otu\_table as a biom file with taxonomy
+
+``` r
+jsonbiomfile = "path_to_file/otu_table_fix.biom"
+mapfile = "path_to_file/v35_map_uniquebyPSN.txt"
+biom = import_biom(jsonbiomfile, mapfile, parseFunction=parse_taxonomy_greengenes)
+map = import_qiime_sample_data(mapfile)
+input = merge_phyloseq(biom,map)
+```
+
+For further data input methods and examples go to <https://joey711.github.io/phyloseq/import-data.html>
+
 How to install PIME package
 ===========================
 
@@ -32,7 +69,7 @@ Prediction using random forests on full dataset. Results in Out of Bag error rat
 library(pime)
 data("restroom")
 pime.oob.error(restroom, "Environment")
-#> [1] 0.5555556
+#> [1] 0.6111111
 ```
 
 The OOB error rate &lt;=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.
@@ -114,18 +151,18 @@ This function will return a table with Out of Bag error from random forests for 
 set.seed(42)
 best.prev=pime.best.prevalence(prevalences, "Environment")
 #>        Interval OOB error rate (%) OTUs Nseqs
-#>   Prevalence 5%              44.44 3253  9000
-#>  Prevalence 10%              55.56 3253  9000
+#>   Prevalence 5%              55.56 3253  9000
+#>  Prevalence 10%                 50 3253  9000
 #>  Prevalence 15%              11.11  593  5438
 #>  Prevalence 20%              11.11  593  5438
-#>  Prevalence 25%              16.67  222  4370
-#>  Prevalence 30%               5.56  222  4370
+#>  Prevalence 25%              11.11  222  4370
+#>  Prevalence 30%              11.11  222  4370
 #>  Prevalence 35%               5.56  117  3835
 #>  Prevalence 40%               5.56  117  3835
-#>  Prevalence 45%               5.56   77  3531
-#>  Prevalence 50%               5.56   77  3531
+#>  Prevalence 45%                  0   77  3531
+#>  Prevalence 50%                  0   77  3531
 #>  Prevalence 55%               5.56   77  3531
-#>  Prevalence 60%               5.56   45  3088
+#>  Prevalence 60%                  0   45  3088
 #>  Prevalence 65%                  0   45  3088
 #>  Prevalence 70%                  0   26  2617
 #>  Prevalence 75%                  0   26  2617
@@ -144,10 +181,10 @@ imp65=best.prev$`Importance`$`Prevalence 65`
 head(knitr::kable(imp65, format="markdown"))
 #> [1] "|SequenceID  | Restroom_F| Restroom_M| MeanDecreaseAccuracy| MeanDecreaseGini|Rank1       |Rank2             |Rank3                  |Rank4                |Rank5                  |Rank6               |Rank7    |"
 #> [2] "|:-----------|----------:|----------:|--------------------:|----------------:|:-----------|:-----------------|:----------------------|:--------------------|:----------------------|:-------------------|:--------|"
-#> [3] "|denovo87919 |  0.0757667|  0.0606667|            0.0612341|        1.0158054|k__Bacteria |p__Actinobacteria |c__Actinobacteria      |o__Bifidobacteriales |f__Bifidobacteriaceae  |NA                  |NA       |"
-#> [4] "|denovo22521 |  0.0356000|  0.0179000|            0.0244095|        0.5767724|Unassigned  |NA                |NA                     |NA                   |NA                     |NA                  |NA       |"
-#> [5] "|denovo6450  |  0.0330667|  0.0196000|            0.0237397|        0.5189465|k__Bacteria |p__Proteobacteria |c__Gammaproteobacteria |o__Pseudomonadales   |f__Moraxellaceae       |g__Enhydrobacter    |s__      |"
-#> [6] "|denovo1419  |  0.0150524|  0.0330333|            0.0215294|        0.4957805|Unassigned  |NA                |NA                     |NA                   |NA                     |NA                  |NA       |"
+#> [3] "|denovo87919 |  0.0909333|  0.0883333|            0.0804214|        1.3798848|k__Bacteria |p__Firmicutes     |c__Bacilli             |o__Lactobacillales   |f__Lactobacillaceae    |g__Lactobacillus    |s__iners |"
+#> [4] "|denovo22521 |  0.0420333|  0.0257333|            0.0312325|        0.8396941|k__Bacteria |p__Proteobacteria |c__Gammaproteobacteria |o__Pseudomonadales   |f__Pseudomonadaceae    |g__Pseudomonas      |s__      |"
+#> [5] "|denovo65044 |  0.0282000|  0.0372857|            0.0292992|        0.6619939|Unassigned  |NA                |NA                     |NA                   |NA                     |NA                  |NA       |"
+#> [6] "|denovo6450  |  0.0302667|  0.0171000|            0.0215468|        0.4021410|k__Bacteria |p__Proteobacteria |c__Alphaproteobacteria |o__Sphingomonadales  |f__Sphingomonadaceae   |g__Sphingomonas     |s__      |"
 
 #To get the table with OOB error results.
 #best.prev$`OOB error`
@@ -207,4 +244,4 @@ Eric W. Triplett (University of Florida - United States of America)
 Citation
 ========
 
-Roesch et al. (2018), PIME: a package for discovery of novel differences among microbial communities
+Roesch et al. (2018), PIME: including the concept of prevalence for uncovering differences in microbiome noised data. Frontiers, submitted.

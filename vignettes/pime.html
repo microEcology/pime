@@ -7,12 +7,13 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
 
-<title>PIME</title>
+<title>PIME - Prevalence Interval for Microbiome Evaluation</title>
 
 
 
@@ -68,7 +69,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -91,645 +92,193 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">PIME</h1>
+<h1 class="title toc-ignore">PIME - Prevalence Interval for Microbiome Evaluation</h1>
 
 
 
-<div id="how-to-install-pime-package" class="section level2">
-<h2>How to install PIME package</h2>
-<p>To install PIME Package first install the devtools package, install.packages(“devtools”). Then run install_github(“microEcology/pime”) pime uses a Phyloseq object as input. A description of the phyloseq object and a tutorial on how to create this file in R using OTU tables in many different formats is detailed into the Phyloseq website <a href="https://joey711.github.io/phyloseq/" class="uri">https://joey711.github.io/phyloseq/</a></p>
+<div id="pime-prevalence-interval-for-microbiome-evaluation" class="section level1">
+<h1>PIME: Prevalence Interval for Microbiome Evaluation</h1>
+<p>PIME removes the within group variation found in metataxonomic surveys (16S rRNA datasets) by capturing only biological differences at high samples prevalence levels.</p>
 </div>
-<div id="step-by-step-example." class="section level2">
-<h2>Step-by-step example.</h2>
-<p>The first step in PIME is to define whether the microbial community presents a high relative abundance of taxa with low prevalence, which is defined as noise in PIME analysis. This is defined by Random Forests analysis. In this example we run PIME using the restroom dataset (<a href="https://doi.org/10.1007%2Fs10482-017-0976-6">https://doi.org/10.1007%2Fs10482-017-0976-6</a>) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom).</p>
-<p>The prediction using random forests trees on full dataset. Results in Out of Bag error rate</p>
+<div id="first-steps-installing-phyloseq-and-creating-a-phyloseq-object" class="section level1">
+<h1>First steps: installing ‘phyloseq’ and creating a ‘phyloseq’ object</h1>
+<p>To install phyloseq start R and enter:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span> (<span class="op">!</span><span class="kw">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="dt">quietly =</span> <span class="ot">TRUE</span>))
+    <span class="kw">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)
+BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">&quot;phyloseq&quot;</span>)</code></pre></div>
+<p>Phyloseq aggregates, mainly, an otu_table (with OTUs abundances), tax_table (taxonomy), and a sample_data (sample information) objects.</p>
+<p>Importing output from DADA2</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">seqtab =<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;path_to_file/sequence_table_final.rds&quot;</span>)
+tax=<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;path_to_file/tax_final.rds&quot;</span>)
+map &lt;-<span class="st"> &quot;path_to_file/sample_data.txt&quot;</span>
+ps &lt;-<span class="st"> </span><span class="kw">phyloseq</span>(<span class="kw">otu_table</span>(seqtab, <span class="dt">taxa_are_rows=</span><span class="ot">FALSE</span>), 
+               <span class="kw">tax_table</span>(taxa))
+sample_metadata =<span class="st"> </span><span class="kw">import_qiime_sample_data</span>(map)
+physeq =<span class="kw">merge_phyloseq</span>(ps, sample_metadata)</code></pre></div>
+<p>Importing otu_table as a biom file with taxonomy</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">jsonbiomfile =<span class="st"> &quot;path_to_file/otu_table_fix.biom&quot;</span>
+mapfile =<span class="st"> &quot;path_to_file/v35_map_uniquebyPSN.txt&quot;</span>
+biom =<span class="st"> </span><span class="kw">import_biom</span>(jsonbiomfile, mapfile, <span class="dt">parseFunction=</span>parse_taxonomy_greengenes)
+map =<span class="st"> </span><span class="kw">import_qiime_sample_data</span>(mapfile)
+input =<span class="st"> </span><span class="kw">merge_phyloseq</span>(biom,map)</code></pre></div>
+<p>For further data input methods and examples go to <a href="https://joey711.github.io/phyloseq/import-data.html" class="uri">https://joey711.github.io/phyloseq/import-data.html</a></p>
+</div>
+<div id="how-to-install-pime-package" class="section level1">
+<h1>How to install PIME package</h1>
+<p>To install PIME first install the devtools package. Then load the library(devtools) and run install_github using the following commands.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#install.packages(&quot;devtools&quot;)</span>
+<span class="kw">library</span>(devtools)
+<span class="kw">install_github</span>(<span class="st">&quot;microEcology/pime&quot;</span>)</code></pre></div>
+<p>PIME uses a Phyloseq object as input. A description of the phyloseq object and a tutorial on how to create this file in R using OTU tables in many different formats is detailed into the Phyloseq website <a href="https://joey711.github.io/phyloseq/" class="uri">https://joey711.github.io/phyloseq/</a></p>
+</div>
+<div id="step-by-step-example" class="section level1">
+<h1>Step-by-step example</h1>
+<p>The first step in PIME is to define if the microbial community presents a high relative abundance of taxa with low prevalence, which is considered as noise in PIME analysis. This is calculated by random forests analysis. In this example we run PIME using the restroom dataset (<a href="https://doi.org/10.1007%2Fs10482-017-0976-6">https://doi.org/10.1007%2Fs10482-017-0976-6</a>) against the metadata variable called Environment (a variable with two categories: men’s and women’s restroom).</p>
+<p>Prediction using random forests on full dataset. Results in Out of Bag error rate. The input file was rarefied at 500 sequences for the purpose of this example (speed up the analysis). Using a rarefied dataset is recommended at this step.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(pime)
 <span class="kw">data</span>(<span class="st">&quot;restroom&quot;</span>)
-<span class="kw">pime.oob.error</span>(restroom, <span class="st">&quot;Environment&quot;</span>)</code></pre></div>
-<pre><code>## [1] 0.6111111</code></pre>
-<p>If the OOB error rate &lt;=0.1, the dataset present large differences already, and pime might not be necessary. If the OOB error rate is greater, next functions will find the best prevalence interval for the dataset. This function takes two parameters: The phyloseq object (restroom) and the predictor variable (Environment).</p>
-</div>
+<span class="kw">pime.oob.error</span>(restroom, <span class="st">&quot;Environment&quot;</span>)
+<span class="co">#&gt; [1] 0.6111111</span></code></pre></div>
+<p>The OOB error rate &lt;=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.</p>
+<p>This function takes two parameters: The phyloseq object (restroom) and the predictor variable (Environment).</p>
 <div id="split-the-dataset-by-predictor-variable" class="section level2">
 <h2>Split the dataset by predictor variable</h2>
 <p>Two parameters are required to run this function: The phyloseq object (restroom) and the predictor variable (Environment).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">per_variable_obj &lt;-<span class="st"> </span><span class="kw">pime.split.by.variable</span>(restroom, <span class="st">&quot;Environment&quot;</span>)
-per_variable_obj</code></pre></div>
-<pre><code>## $Restroom_F
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 1858 taxa and 9 samples ]
-## sample_data() Sample Data:       [ 9 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 1858 taxa by 7 taxonomic ranks ]
-## 
-## $Restroom_M
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 1983 taxa and 9 samples ]
-## sample_data() Sample Data:       [ 9 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 1983 taxa by 7 taxonomic ranks ]</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">per_variable_obj=<span class="st"> </span><span class="kw">pime.split.by.variable</span>(restroom, <span class="st">&quot;Environment&quot;</span>)
+per_variable_obj
+<span class="co">#&gt; $Restroom_F</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 1858 taxa and 9 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 9 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 1858 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $Restroom_M</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 1983 taxa and 9 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 9 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 1983 taxa by 7 taxonomic ranks ]</span></code></pre></div>
 </div>
 <div id="calculate-the-highest-possible-prevalence-intervals" class="section level2">
 <h2>Calculate the highest possible prevalence intervals</h2>
-<p>This function calculates prevalence for different intervals by increments of 5. The input file is the output from the pime.split.by.variable (per_variable_obj)</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prevalences &lt;-<span class="st"> </span><span class="kw">pime.prevalence</span>(per_variable_obj)
-prevalences</code></pre></div>
-<pre><code>## $`5`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 3253 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 3253 taxa by 7 taxonomic ranks ]
-## 
-## $`10`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 3253 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 3253 taxa by 7 taxonomic ranks ]
-## 
-## $`15`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 593 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 593 taxa by 7 taxonomic ranks ]
-## 
-## $`20`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 593 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 593 taxa by 7 taxonomic ranks ]
-## 
-## $`25`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 222 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 222 taxa by 7 taxonomic ranks ]
-## 
-## $`30`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 222 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 222 taxa by 7 taxonomic ranks ]
-## 
-## $`35`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 117 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 117 taxa by 7 taxonomic ranks ]
-## 
-## $`40`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 117 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 117 taxa by 7 taxonomic ranks ]
-## 
-## $`45`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 77 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 77 taxa by 7 taxonomic ranks ]
-## 
-## $`50`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 77 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 77 taxa by 7 taxonomic ranks ]
-## 
-## $`55`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 77 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 77 taxa by 7 taxonomic ranks ]
-## 
-## $`60`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 45 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 45 taxa by 7 taxonomic ranks ]
-## 
-## $`65`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 45 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 45 taxa by 7 taxonomic ranks ]
-## 
-## $`70`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 26 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 26 taxa by 7 taxonomic ranks ]
-## 
-## $`75`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 26 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 26 taxa by 7 taxonomic ranks ]
-## 
-## $`80`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 16 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 16 taxa by 7 taxonomic ranks ]
-## 
-## $`85`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 16 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 16 taxa by 7 taxonomic ranks ]
-## 
-## $`90`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 4 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 4 taxa by 7 taxonomic ranks ]
-## 
-## $`95`
-## phyloseq-class experiment-level object
-## otu_table()   OTU Table:         [ 4 taxa and 18 samples ]
-## sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
-## tax_table()   Taxonomy Table:    [ 4 taxa by 7 taxonomic ranks ]</code></pre>
+<p>This function calculates prevalence for different intervals by increments of 5. The input file is the output from the pime.split.by.variable(per_variable_obj)</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prevalences=<span class="kw">pime.prevalence</span>(per_variable_obj)
+<span class="kw">head</span>(prevalences)
+<span class="co">#&gt; $`5`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 3253 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 3253 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`10`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 3253 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 3253 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`15`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 593 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 593 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`20`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 593 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 593 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`25`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 222 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 222 taxa by 7 taxonomic ranks ]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $`30`</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 222 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 222 taxa by 7 taxonomic ranks ]</span></code></pre></div>
 </div>
 <div id="calculate-the-best-prevalence-interval-for-the-dataset" class="section level2">
 <h2>Calculate the best prevalence interval for the dataset</h2>
 <p>This function will return a table with Out of Bag error from random forests for each prevalence interval. The number of taxa and the number of remaining sequences for each prevalence interval are also computed. The best prevalence interval value provides the clearest separation of communities while still including a majority of the taxa in the analysis. If true differences are present. It will be represented by the first interval in which the OOB error rate is zero or close to zero. The input file is the list of prevalences generated by the pime.prevalence (prevalences) and the predictor variable (“Environment”“).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">42</span>)
-best.prev=<span class="kw">pime.best.prevalence</span>(prevalences, <span class="st">&quot;Environment&quot;</span>)</code></pre></div>
-<pre><code>##        Interval OOB error rate (%) OTUs Nseqs
-##   Prevalence 5%              44.44 3253  9000
-##  Prevalence 10%              55.56 3253  9000
-##  Prevalence 15%              11.11  593  5438
-##  Prevalence 20%              11.11  593  5438
-##  Prevalence 25%              16.67  222  4370
-##  Prevalence 30%               5.56  222  4370
-##  Prevalence 35%               5.56  117  3835
-##  Prevalence 40%               5.56  117  3835
-##  Prevalence 45%               5.56   77  3531
-##  Prevalence 50%               5.56   77  3531
-##  Prevalence 55%               5.56   77  3531
-##  Prevalence 60%               5.56   45  3088
-##  Prevalence 65%                  0   45  3088
-##  Prevalence 70%                  0   26  2617
-##  Prevalence 75%                  0   26  2617
-##  Prevalence 80%                  0   16  2084
-##  Prevalence 85%                  0   16  2084
-##  Prevalence 90%                  0    4  1489
-##  Prevalence 95%                  0    4  1489</code></pre>
-<p>In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Index) and taxonomy are also included.</p>
+best.prev=<span class="kw">pime.best.prevalence</span>(prevalences, <span class="st">&quot;Environment&quot;</span>)
+<span class="co">#&gt;        Interval OOB error rate (%) OTUs Nseqs</span>
+<span class="co">#&gt;   Prevalence 5%              55.56 3253  9000</span>
+<span class="co">#&gt;  Prevalence 10%                 50 3253  9000</span>
+<span class="co">#&gt;  Prevalence 15%              11.11  593  5438</span>
+<span class="co">#&gt;  Prevalence 20%              11.11  593  5438</span>
+<span class="co">#&gt;  Prevalence 25%              11.11  222  4370</span>
+<span class="co">#&gt;  Prevalence 30%              11.11  222  4370</span>
+<span class="co">#&gt;  Prevalence 35%               5.56  117  3835</span>
+<span class="co">#&gt;  Prevalence 40%               5.56  117  3835</span>
+<span class="co">#&gt;  Prevalence 45%                  0   77  3531</span>
+<span class="co">#&gt;  Prevalence 50%                  0   77  3531</span>
+<span class="co">#&gt;  Prevalence 55%               5.56   77  3531</span>
+<span class="co">#&gt;  Prevalence 60%                  0   45  3088</span>
+<span class="co">#&gt;  Prevalence 65%                  0   45  3088</span>
+<span class="co">#&gt;  Prevalence 70%                  0   26  2617</span>
+<span class="co">#&gt;  Prevalence 75%                  0   26  2617</span>
+<span class="co">#&gt;  Prevalence 80%                  0   16  2084</span>
+<span class="co">#&gt;  Prevalence 85%                  0   16  2084</span>
+<span class="co">#&gt;  Prevalence 90%                  0    4  1489</span>
+<span class="co">#&gt;  Prevalence 95%                  0    4  1489</span></code></pre></div>
+<p>In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.</p>
 <p>To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">imp50=best.prev<span class="op">$</span><span class="st">`</span><span class="dt">Importance</span><span class="st">`</span><span class="op">$</span><span class="st">`</span><span class="dt">Prevalence 50</span><span class="st">`</span>
-knitr<span class="op">::</span><span class="kw">kable</span>(imp50) <span class="op">%&gt;%</span><span class="st"> </span>kableExtra<span class="op">::</span><span class="kw">kable_styling</span>(<span class="dt">full_width =</span> F)</code></pre></div>
-<pre><code>## Warning in kableExtra::kable_styling(., full_width = F): Please specify
-## format in kable. kableExtra can customize either HTML or LaTeX outputs. See
-## https://haozhu233.github.io/kableExtra/ for details.</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="left">SequenceID</th>
-<th align="right">Restroom_F</th>
-<th align="right">Restroom_M</th>
-<th align="right">MeanDecreaseAccuracy</th>
-<th align="right">MeanDecreaseGini</th>
-<th align="left">Rank1</th>
-<th align="left">Rank2</th>
-<th align="left">Rank3</th>
-<th align="left">Rank4</th>
-<th align="left">Rank5</th>
-<th align="left">Rank6</th>
-<th align="left">Rank7</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">denovo87919</td>
-<td align="right">0.0776333</td>
-<td align="right">0.0765190</td>
-<td align="right">0.0704333</td>
-<td align="right">1.2137966</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Actinobacteria</td>
-<td align="left">c__Actinobacteria</td>
-<td align="left">o__Bifidobacteriales</td>
-<td align="left">f__Bifidobacteriaceae</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo22521</td>
-<td align="right">0.0297333</td>
-<td align="right">0.0208333</td>
-<td align="right">0.0236817</td>
-<td align="right">0.4528930</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo33035</td>
-<td align="right">0.0258333</td>
-<td align="right">0.0152667</td>
-<td align="right">0.0183659</td>
-<td align="right">0.4317984</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Gammaproteobacteria</td>
-<td align="left">o__Pseudomonadales</td>
-<td align="left">f__Moraxellaceae</td>
-<td align="left">g__Enhydrobacter</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo6450</td>
-<td align="right">0.0253667</td>
-<td align="right">0.0114333</td>
-<td align="right">0.0156310</td>
-<td align="right">0.4134463</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo10912</td>
-<td align="right">0.0123667</td>
-<td align="right">0.0170000</td>
-<td align="right">0.0128119</td>
-<td align="right">0.2605335</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo29652</td>
-<td align="right">0.0171333</td>
-<td align="right">0.0073000</td>
-<td align="right">0.0112579</td>
-<td align="right">0.2908274</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Caulobacterales</td>
-<td align="left">f__Caulobacteraceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo39172</td>
-<td align="right">0.0168333</td>
-<td align="right">0.0082333</td>
-<td align="right">0.0112333</td>
-<td align="right">0.2486054</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo93818</td>
-<td align="right">0.0136667</td>
-<td align="right">0.0028000</td>
-<td align="right">0.0073595</td>
-<td align="right">0.1880742</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Rhizobiales</td>
-<td align="left">f__Rhizobiaceae</td>
-<td align="left">g__Agrobacterium</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo23087</td>
-<td align="right">0.0113333</td>
-<td align="right">0.0052333</td>
-<td align="right">0.0068659</td>
-<td align="right">0.2143583</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Rhizobiales</td>
-<td align="left">f__Bradyrhizobiaceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo1419</td>
-<td align="right">0.0049000</td>
-<td align="right">0.0098333</td>
-<td align="right">0.0065151</td>
-<td align="right">0.2633974</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Betaproteobacteria</td>
-<td align="left">o__Burkholderiales</td>
-<td align="left">f__Alcaligenaceae</td>
-<td align="left">g__Oligella</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo54197</td>
-<td align="right">0.0065667</td>
-<td align="right">0.0067333</td>
-<td align="right">0.0063167</td>
-<td align="right">0.1082113</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo82372</td>
-<td align="right">0.0041333</td>
-<td align="right">0.0089667</td>
-<td align="right">0.0063016</td>
-<td align="right">0.2971342</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Lactobacillaceae</td>
-<td align="left">g__Lactobacillus</td>
-<td align="left">s__iners</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo36101</td>
-<td align="right">0.0058000</td>
-<td align="right">0.0079000</td>
-<td align="right">0.0060119</td>
-<td align="right">0.1715974</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo89615</td>
-<td align="right">0.0062333</td>
-<td align="right">0.0036667</td>
-<td align="right">0.0044794</td>
-<td align="right">0.0664763</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Sphingomonadales</td>
-<td align="left">f__Sphingomonadaceae</td>
-<td align="left">g__Sphingomonas</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo12214</td>
-<td align="right">0.0065667</td>
-<td align="right">0.0018667</td>
-<td align="right">0.0038452</td>
-<td align="right">0.1145229</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Betaproteobacteria</td>
-<td align="left">o__Burkholderiales</td>
-<td align="left">f__Burkholderiaceae</td>
-<td align="left">g__Burkholderia</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo52978</td>
-<td align="right">0.0044667</td>
-<td align="right">0.0028333</td>
-<td align="right">0.0037270</td>
-<td align="right">0.1170156</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Gammaproteobacteria</td>
-<td align="left">o__Pseudomonadales</td>
-<td align="left">f__Pseudomonadaceae</td>
-<td align="left">g__Pseudomonas</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo85345</td>
-<td align="right">0.0075000</td>
-<td align="right">0.0013333</td>
-<td align="right">0.0037095</td>
-<td align="right">0.1714968</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Sphingomonadales</td>
-<td align="left">f__Sphingomonadaceae</td>
-<td align="left">g__Sphingomonas</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo36489</td>
-<td align="right">0.0083333</td>
-<td align="right">0.0014000</td>
-<td align="right">0.0035619</td>
-<td align="right">0.1085278</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Actinobacteria</td>
-<td align="left">c__Actinobacteria</td>
-<td align="left">o__Actinomycetales</td>
-<td align="left">f__Kineosporiaceae</td>
-<td align="left">g__Kineococcus</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo90494</td>
-<td align="right">0.0059333</td>
-<td align="right">0.0014000</td>
-<td align="right">0.0034833</td>
-<td align="right">0.1556812</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Gammaproteobacteria</td>
-<td align="left">o__Pseudomonadales</td>
-<td align="left">f__Pseudomonadaceae</td>
-<td align="left">g__Pseudomonas</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo89134</td>
-<td align="right">0.0072333</td>
-<td align="right">0.0016667</td>
-<td align="right">0.0033651</td>
-<td align="right">0.1255719</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Cyanobacteria</td>
-<td align="left">c__Chloroplast</td>
-<td align="left">o__Streptophyta</td>
-<td align="left">f__</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo47015</td>
-<td align="right">0.0018333</td>
-<td align="right">0.0065667</td>
-<td align="right">0.0032921</td>
-<td align="right">0.1706578</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td align="left">denovo32646</td>
-<td align="right">0.0029000</td>
-<td align="right">0.0045000</td>
-<td align="right">0.0032167</td>
-<td align="right">0.0598536</td>
-<td align="left">Unassigned</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo48776</td>
-<td align="right">0.0051667</td>
-<td align="right">0.0011667</td>
-<td align="right">0.0031548</td>
-<td align="right">0.0731759</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Actinobacteria</td>
-<td align="left">c__Actinobacteria</td>
-<td align="left">o__Actinomycetales</td>
-<td align="left">f__Geodermatophilaceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo20749</td>
-<td align="right">0.0018667</td>
-<td align="right">0.0043333</td>
-<td align="right">0.0027619</td>
-<td align="right">0.0508838</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Streptococcaceae</td>
-<td align="left">g__Streptococcus</td>
-<td align="left">s__luteciae</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo89459</td>
-<td align="right">0.0036667</td>
-<td align="right">0.0013333</td>
-<td align="right">0.0023833</td>
-<td align="right">0.0700364</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Leuconostocaceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo9564</td>
-<td align="right">0.0030000</td>
-<td align="right">0.0021667</td>
-<td align="right">0.0023714</td>
-<td align="right">0.0686207</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Firmicutes</td>
-<td align="left">c__Bacilli</td>
-<td align="left">o__Lactobacillales</td>
-<td align="left">f__Leuconostocaceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo23140</td>
-<td align="right">0.0003333</td>
-<td align="right">0.0050000</td>
-<td align="right">0.0023524</td>
-<td align="right">0.1317996</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Rickettsiales</td>
-<td align="left">f__Rickettsiaceae</td>
-<td align="left">g__Rickettsia</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo92294</td>
-<td align="right">0.0016667</td>
-<td align="right">0.0034000</td>
-<td align="right">0.0023214</td>
-<td align="right">0.0922137</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Betaproteobacteria</td>
-<td align="left">o__Burkholderiales</td>
-<td align="left">f__Burkholderiaceae</td>
-<td align="left">g__Burkholderia</td>
-<td align="left">s__</td>
-</tr>
-<tr class="odd">
-<td align="left">denovo47441</td>
-<td align="right">0.0053000</td>
-<td align="right">0.0009333</td>
-<td align="right">0.0021698</td>
-<td align="right">0.1134051</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Proteobacteria</td>
-<td align="left">c__Alphaproteobacteria</td>
-<td align="left">o__Sphingomonadales</td>
-<td align="left">f__Sphingomonadaceae</td>
-<td align="left">g__Sphingomonas</td>
-<td align="left">s__</td>
-</tr>
-<tr class="even">
-<td align="left">denovo73033</td>
-<td align="right">0.0026667</td>
-<td align="right">0.0020000</td>
-<td align="right">0.0021333</td>
-<td align="right">0.0524085</td>
-<td align="left">k__Bacteria</td>
-<td align="left">p__Actinobacteria</td>
-<td align="left">c__Actinobacteria</td>
-<td align="left">o__Actinomycetales</td>
-<td align="left">f__Geodermatophilaceae</td>
-<td align="left">g__</td>
-<td align="left">s__</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#To get the table with OOB error results.</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">imp65=best.prev<span class="op">$</span><span class="st">`</span><span class="dt">Importance</span><span class="st">`</span><span class="op">$</span><span class="st">`</span><span class="dt">Prevalence 65</span><span class="st">`</span>
+<span class="kw">head</span>(knitr<span class="op">::</span><span class="kw">kable</span>(imp65, <span class="dt">format=</span><span class="st">&quot;markdown&quot;</span>))
+<span class="co">#&gt; [1] &quot;|SequenceID  | Restroom_F| Restroom_M| MeanDecreaseAccuracy| MeanDecreaseGini|Rank1       |Rank2             |Rank3                  |Rank4                |Rank5                  |Rank6               |Rank7    |&quot;</span>
+<span class="co">#&gt; [2] &quot;|:-----------|----------:|----------:|--------------------:|----------------:|:-----------|:-----------------|:----------------------|:--------------------|:----------------------|:-------------------|:--------|&quot;</span>
+<span class="co">#&gt; [3] &quot;|denovo87919 |  0.0909333|  0.0883333|            0.0804214|        1.3798848|k__Bacteria |p__Firmicutes     |c__Bacilli             |o__Lactobacillales   |f__Lactobacillaceae    |g__Lactobacillus    |s__iners |&quot;</span>
+<span class="co">#&gt; [4] &quot;|denovo22521 |  0.0420333|  0.0257333|            0.0312325|        0.8396941|k__Bacteria |p__Proteobacteria |c__Gammaproteobacteria |o__Pseudomonadales   |f__Pseudomonadaceae    |g__Pseudomonas      |s__      |&quot;</span>
+<span class="co">#&gt; [5] &quot;|denovo65044 |  0.0282000|  0.0372857|            0.0292992|        0.6619939|Unassigned  |NA                |NA                     |NA                   |NA                     |NA                  |NA       |&quot;</span>
+<span class="co">#&gt; [6] &quot;|denovo6450  |  0.0302667|  0.0171000|            0.0215468|        0.4021410|k__Bacteria |p__Proteobacteria |c__Alphaproteobacteria |o__Sphingomonadales  |f__Sphingomonadaceae   |g__Sphingomonas     |s__      |&quot;</span>
+
+<span class="co">#To get the table with OOB error results.</span>
 <span class="co">#best.prev$`OOB error`</span></code></pre></div>
+</div>
+<div id="within-this-dataset-the-best-prevalence-interval-was-65" class="section level2">
+<h2>Within this dataset the best prevalence interval was 65%</h2>
+<p>To obtain the phyloseq object at this cutoff use the following command.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">prevalence.<span class="dv">65</span> =<span class="st"> </span>prevalences<span class="op">$</span><span class="st">`</span><span class="dt">65</span><span class="st">`</span>
+prevalence.<span class="dv">65</span>
+<span class="co">#&gt; phyloseq-class experiment-level object</span>
+<span class="co">#&gt; otu_table()   OTU Table:         [ 45 taxa and 18 samples ]</span>
+<span class="co">#&gt; sample_data() Sample Data:       [ 18 samples by 6 sample variables ]</span>
+<span class="co">#&gt; tax_table()   Taxonomy Table:    [ 45 taxa by 7 taxonomic ranks ]</span></code></pre></div>
 </div>
 <div id="estimating-prediction-error" class="section level2">
 <h2>Estimating prediction error</h2>
-<p>To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns in a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#randomized=pime.error.prediction(restroom, &quot;Environment&quot;, bootstrap = 10, parallel = TRUE, max.prev = 95)</span>
-<span class="co">#randomized$Plot</span>
-<span class="co">#randomized$`Table results'</span></code></pre></div>
-<p>It is also possible to estimate the variation of Out of Bag error with each prevalence interval filtering. This is done by running the random forests classification for n times, determined by the user. This function will return a boxplot figure and a table for each classificaiton error.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#replicated.oob.error= pime.oob.replicate(prevalences, &quot;Environment&quot;, bootstrap = 10, parallel = TRUE)</span></code></pre></div>
+<p>To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">randomized=<span class="kw">pime.error.prediction</span>(restroom, <span class="st">&quot;Environment&quot;</span>, <span class="dt">bootstrap =</span> <span class="dv">10</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>, <span class="dt">max.prev =</span> <span class="dv">95</span>)
+randomized<span class="op">$</span>Plot
+randomized<span class="op">$</span><span class="st">'Table results'</span></code></pre></div>
+<p>It is also possible to estimate the variation of OOB error with each prevalence interval filtering. This is done by running the random forests classification for n times, determined by the user. This function will return a boxplot figure and a table for each classification error.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">replicated.oob.error=<span class="st"> </span><span class="kw">pime.oob.replicate</span>(prevalences, <span class="st">&quot;Environment&quot;</span>, <span class="dt">bootstrap =</span> <span class="dv">10</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>)</code></pre></div>
+</div>
+</div>
+<div id="getting-help" class="section level1">
+<h1>Getting Help</h1>
+<p>Please contact us if you need any help: <em><a href="mailto:contact@brmicrobiome.org">contact@brmicrobiome.org</a></em></p>
+</div>
+<div id="pime-team" class="section level1">
+<h1>PIME Team</h1>
+<p>Luiz F. W. Roesch (Universidade Federal do Pampa - Brazil)</p>
+<p>Priscila T. Dobbler (Universidade Federal do Pampa - Brazil)</p>
+<p>Victor S. Pylro (Universidade Federal de Lavras - Brazil)</p>
+<p>Bryan Kolaczkowski (University of Florida - United States of America)</p>
+<p>Jennifer C. Drew (University of Florida - United States of America)</p>
+<p>Eric W. Triplett (University of Florida - United States of America)</p>
+</div>
+<div id="citation" class="section level1">
+<h1>Citation</h1>
+<p>Roesch et al. (2018), PIME: including the concept of prevalence for uncovering differences in microbiome noised data. Frontiers, submitted.</p>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
