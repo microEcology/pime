@@ -69,7 +69,7 @@ Prediction using random forests on full dataset. Results in Out of Bag error rat
 library(pime)
 data("restroom")
 pime.oob.error(restroom, "Environment")
-#> [1] 0.6111111
+#> [1] 0.5
 ```
 
 The OOB error rate &lt;=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.
@@ -172,19 +172,135 @@ best.prev=pime.best.prevalence(prevalences, "Environment")
 #>  Prevalence 95%                  0    4  1489
 ```
 
-In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accurracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.
+In addition, it also returns the results from the random forests classification for each prevalence level. It includes SequenceID (OTU/ASV), Mean Decrease Accuracy (MDA) for each sample group, that is how much that SequenceID was important for classification of that group. The Mean Decrease Impurity (Gini Importance) and taxonomy are also included.
 
-To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, whith highest MDA.
+To get the table with OTU/ASV importance of the chosen prevalence interval. Pime keeps only the top 30 OTUs/ASVs, with highest MDA.
 
 ``` r
 imp65=best.prev$`Importance`$`Prevalence 65`
-head(knitr::kable(imp65, format="markdown"))
-#> [1] "|SequenceID  | Restroom_F| Restroom_M| MeanDecreaseAccuracy| MeanDecreaseGini|Rank1       |Rank2             |Rank3                  |Rank4                |Rank5                  |Rank6               |Rank7    |"
-#> [2] "|:-----------|----------:|----------:|--------------------:|----------------:|:-----------|:-----------------|:----------------------|:--------------------|:----------------------|:-------------------|:--------|"
-#> [3] "|denovo87919 |  0.0909333|  0.0883333|            0.0804214|        1.3798848|k__Bacteria |p__Firmicutes     |c__Bacilli             |o__Lactobacillales   |f__Lactobacillaceae    |g__Lactobacillus    |s__iners |"
-#> [4] "|denovo22521 |  0.0420333|  0.0257333|            0.0312325|        0.8396941|k__Bacteria |p__Proteobacteria |c__Gammaproteobacteria |o__Pseudomonadales   |f__Pseudomonadaceae    |g__Pseudomonas      |s__      |"
-#> [5] "|denovo65044 |  0.0282000|  0.0372857|            0.0292992|        0.6619939|Unassigned  |NA                |NA                     |NA                   |NA                     |NA                  |NA       |"
-#> [6] "|denovo6450  |  0.0302667|  0.0171000|            0.0215468|        0.4021410|k__Bacteria |p__Proteobacteria |c__Alphaproteobacteria |o__Sphingomonadales  |f__Sphingomonadaceae   |g__Sphingomonas     |s__      |"
+knitr::kable(head(imp65), format="markdown")
+```
+
+<table>
+<colgroup>
+<col width="6%" />
+<col width="5%" />
+<col width="5%" />
+<col width="10%" />
+<col width="8%" />
+<col width="6%" />
+<col width="9%" />
+<col width="11%" />
+<col width="10%" />
+<col width="11%" />
+<col width="9%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">SequenceID</th>
+<th align="right">Restroom_F</th>
+<th align="right">Restroom_M</th>
+<th align="right">MeanDecreaseAccuracy</th>
+<th align="right">MeanDecreaseGini</th>
+<th align="left">Rank1</th>
+<th align="left">Rank2</th>
+<th align="left">Rank3</th>
+<th align="left">Rank4</th>
+<th align="left">Rank5</th>
+<th align="left">Rank6</th>
+<th align="left">Rank7</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">denovo87919</td>
+<td align="right">0.0909333</td>
+<td align="right">0.0883333</td>
+<td align="right">0.0804214</td>
+<td align="right">1.3798848</td>
+<td align="left">k__Bacteria</td>
+<td align="left">p__Firmicutes</td>
+<td align="left">c__Bacilli</td>
+<td align="left">o__Lactobacillales</td>
+<td align="left">f__Lactobacillaceae</td>
+<td align="left">g__Lactobacillus</td>
+<td align="left">s__iners</td>
+</tr>
+<tr class="even">
+<td align="left">denovo22521</td>
+<td align="right">0.0420333</td>
+<td align="right">0.0257333</td>
+<td align="right">0.0312325</td>
+<td align="right">0.8396941</td>
+<td align="left">k__Bacteria</td>
+<td align="left">p__Proteobacteria</td>
+<td align="left">c__Gammaproteobacteria</td>
+<td align="left">o__Pseudomonadales</td>
+<td align="left">f__Pseudomonadaceae</td>
+<td align="left">g__Pseudomonas</td>
+<td align="left">s__</td>
+</tr>
+<tr class="odd">
+<td align="left">denovo65044</td>
+<td align="right">0.0282000</td>
+<td align="right">0.0372857</td>
+<td align="right">0.0292992</td>
+<td align="right">0.6619939</td>
+<td align="left">Unassigned</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">denovo6450</td>
+<td align="right">0.0302667</td>
+<td align="right">0.0171000</td>
+<td align="right">0.0215468</td>
+<td align="right">0.4021410</td>
+<td align="left">k__Bacteria</td>
+<td align="left">p__Proteobacteria</td>
+<td align="left">c__Alphaproteobacteria</td>
+<td align="left">o__Sphingomonadales</td>
+<td align="left">f__Sphingomonadaceae</td>
+<td align="left">g__Sphingomonas</td>
+<td align="left">s__</td>
+</tr>
+<tr class="odd">
+<td align="left">denovo1419</td>
+<td align="right">0.0098000</td>
+<td align="right">0.0197000</td>
+<td align="right">0.0127857</td>
+<td align="right">0.3298748</td>
+<td align="left">k__Bacteria</td>
+<td align="left">p__Actinobacteria</td>
+<td align="left">c__Actinobacteria</td>
+<td align="left">o__Bifidobacteriales</td>
+<td align="left">f__Bifidobacteriaceae</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">denovo88424</td>
+<td align="right">0.0098667</td>
+<td align="right">0.0168667</td>
+<td align="right">0.0122939</td>
+<td align="right">0.3698211</td>
+<td align="left">k__Bacteria</td>
+<td align="left">p__Actinobacteria</td>
+<td align="left">c__Actinobacteria</td>
+<td align="left">o__Actinomycetales</td>
+<td align="left">f__Corynebacteriaceae</td>
+<td align="left">g__Corynebacterium</td>
+<td align="left">s__</td>
+</tr>
+</tbody>
+</table>
+
+``` r
 
 #To get the table with OOB error results.
 #best.prev$`OOB error`
