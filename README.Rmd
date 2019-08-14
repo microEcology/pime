@@ -72,7 +72,7 @@ PIME uses a Phyloseq object as input. A description of the phyloseq object and a
 # Step-by-step example
 
 
-```{r, echo=FALSE, out.height='1000px'}
+```{r, echo=FALSE}
 knitr::include_graphics("doc/Figure2.png", dpi = NULL)
 ```
 
