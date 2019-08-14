@@ -54,7 +54,7 @@ pime.best.prevalence<-function (prev.list, variable) {
     randon[[length(randon)+1]] <-  round(train.model$err.rate[500,1], digits=4)*100
     Importance <- train.model$importance
     imp.otu <- data.frame(rownames(Importance), Importance) 
-    k=as.data.frame(tax_table(i)) %>% .[rownames(.)%in%imp.otu[,1],] %>% 
+    k=i %>% tax_table() %>% as("matrix") %>% data.frame() %>% 
       data.frame(imp.otu,.) %>% dplyr::arrange(., dplyr::desc(.data$MeanDecreaseAccuracy)) %>%
       dplyr::top_n(30, .data$MeanDecreaseAccuracy)
     names(k)[1]<-c("SequenceID")
