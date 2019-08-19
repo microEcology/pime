@@ -69,7 +69,7 @@ Prediction using random forests on full dataset. Results in Out of Bag error rat
 library(pime)
 data("restroom")
 pime.oob.error(restroom, "Environment")
-#> [1] 0.3888889
+#> [1] 0.4444444
 ```
 
 The OOB error rate &lt;=0.1, indicated the dataset present large differences, and pime might not remove much of the noise. Higher OOB error rate indicates that the next functions should be run to find the best prevalence interval for the dataset.
@@ -318,6 +318,15 @@ prevalence.65
 #> otu_table()   OTU Table:         [ 45 taxa and 18 samples ]
 #> sample_data() Sample Data:       [ 18 samples by 6 sample variables ]
 #> tax_table()   Taxonomy Table:    [ 45 taxa by 7 taxonomic ranks ]
+```
+
+To obtain the confusion matrix from random forests classification use the folowing:
+
+``` r
+best.prev$Confusion$`Prevalence 65`
+#>            Restroom_F Restroom_M class.error
+#> Restroom_F          9          0           0
+#> Restroom_M          0          9           0
 ```
 
 Estimating prediction error

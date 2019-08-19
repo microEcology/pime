@@ -37,6 +37,7 @@
 pime.best.prevalence<-function (prev.list, variable) {
   randon<-list()
   imp<-list()
+  confusion<-list()
   gs <- as(object = sample_data(prev.list[[1]]), Class = "data.frame")
   Variable <- as.factor(gs[, variable])
   pb <- progress::progress_bar$new(total = length(prev.list), clear=F, show_after = 0)
@@ -60,10 +61,12 @@ pime.best.prevalence<-function (prev.list, variable) {
     names(k)[1]<-c("SequenceID")
     rownames(k)<-NULL
     imp[[length(imp)+1]]=k
+    confusion[[length(confusion)+1]]=train.model$confusion
    }
   #names tables from Lista as the names of the tables inside list.core
   names(randon) <- paste("Prevalence", names(prev.list))
   names(imp) <- paste("Prevalence", names(prev.list))
+  names(confusion)<- paste("Prevalence",names(prev.list))
   #gets only the first line, all columns of every table inside perm
   Interval= paste(names(randon), "%", sep = "")
   "OOB error rate (%)" <- as.numeric(sapply(randon, cbind))
@@ -72,5 +75,5 @@ pime.best.prevalence<-function (prev.list, variable) {
   OOB.err=as.data.frame(cbind(Interval,`OOB error rate (%)`,OTUs,Nseqs))
   rownames(OOB.err) <- NULL
   print(OOB.err, row.names=FALSE)
-  return(list("OOB error"=OOB.err, "Importance"=imp))
+  return(list("OOB error"=OOB.err, "Importance"=imp, "Confusion"=confusion))
 }

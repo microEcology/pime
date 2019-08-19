@@ -12,7 +12,7 @@
 #'@examples phylist=pime.split.by.variable(restroom, "Environment")
 #'prevalences=pime.prevalence(phylist)
 #'set.seed(42)
-#'tab=pime.bootstraped.randonForest(prevalences, "Environment", bootstrap=10, parallel=TRUE)
+#'tab=pime.oob.replicate(prevalences, "Environment", bootstrap=10, parallel=TRUE)
 #'tab$Plot
 #'tab$'Results table'
 #' @importFrom phyloseq "otu_table"

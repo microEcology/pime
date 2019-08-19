@@ -134,6 +134,12 @@ To obtain the phyloseq object at this cutoff use the following command.
 prevalence.65 = prevalences$`65`
 prevalence.65
 ```
+
+To obtain the confusion matrix from random forests classification use the folowing:
+```{r}
+best.prev$Confusion$`Prevalence 65`
+```
+
 ## Estimating prediction error
 To estimate error in prediction, we will use pime.error.prediction() to randomly assign treatments to samples and run random forests classification on each prevalence interval. The function returns a boxplot and a table with results of each classification error. For the purposes of this example we are running only 10 randomizations for saving time but we recommend at least 100 randomizations to obtain reliable results.
 ```{r, eval=FALSE}
