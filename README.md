@@ -371,5 +371,5 @@ Citation
 
 PIME: a package for discovery of novel differences among microbial communities
 Luiz Fernando W. Roesch, Priscila Thiago Dobbler, Victor Satler Pylro, Bryan Kolaczkowski, Jennifer C. Drew, Eric W. Triplett
-doi: https://doi.org/10.1101/632182
+doi: https://doi.org/10.1111/1755-0998.13116
 
